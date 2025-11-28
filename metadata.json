@@ -1,0 +1,8 @@
+{
+  "name": "EcoRecycle - Door-to-Door Recycling",
+  "description": "A convenient app for scheduling door-to-door recyclable waste collection, managing orders, and tracking environmental impact.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ]
+}
