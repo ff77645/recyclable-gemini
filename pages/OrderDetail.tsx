@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, MapPin, Package, Clock, Phone, AlertCircle, CheckCircle } from 'lucide-react';
+import { ArrowLeft, MapPin, Package, Clock, Phone, AlertCircle, CheckCircle, Leaf } from 'lucide-react';
 import { getOrderById, cancelOrder, CATEGORIES } from '../services/mockService';
 import { Order, OrderStatus } from '../types';
 
@@ -44,6 +44,7 @@ const OrderDetail: React.FC = () => {
 
   const currentStepIndex = steps.findIndex(s => s.status === order.status);
   const isCancelled = order.status === OrderStatus.CANCELLED;
+  const isCompleted = order.status === OrderStatus.COMPLETED;
 
   return (
     <div className="flex flex-col h-full bg-gray-50">
@@ -66,41 +67,56 @@ const OrderDetail: React.FC = () => {
                 </div>
             ) : (
                 <>
-                    <div className="flex items-center justify-between mb-6 relative">
-                         {/* Progress Bar Background */}
-                        <div className="absolute top-3 left-0 w-full h-1 bg-gray-100 -z-0"></div>
-                        {/* Current Progress */}
-                        {currentStepIndex >= 0 && (
-                            <div 
-                                className="absolute top-3 left-0 h-1 bg-primary -z-0 transition-all duration-500"
-                                style={{ width: `${(currentStepIndex / (steps.length - 1)) * 100}%` }}
-                            ></div>
-                        )}
-                        
-                        {steps.map((step, idx) => {
-                            const isCompleted = currentStepIndex >= idx;
-                            const isCurrent = currentStepIndex === idx;
-                            return (
-                                <div key={step.status} className="relative z-10 flex flex-col items-center">
-                                    <div className={`w-7 h-7 rounded-full flex items-center justify-center border-2 bg-white ${
-                                        isCompleted ? 'border-primary text-primary' : 'border-gray-200 text-gray-300'
-                                    }`}>
-                                        <div className={`w-3 h-3 rounded-full ${isCompleted ? 'bg-primary' : 'bg-transparent'}`}></div>
+                    {isCompleted ? (
+                        <div className="mb-6 bg-emerald-50 rounded-xl p-4 border border-emerald-100 flex items-center space-x-3">
+                            <div className="bg-emerald-100 p-2 rounded-full">
+                                <Leaf size={24} className="text-emerald-600" />
+                            </div>
+                            <div>
+                                <h3 className="text-emerald-800 font-bold text-sm">感谢您的环保行动！</h3>
+                                <p className="text-emerald-600 text-xs mt-0.5">本次回收减少碳排放约 <span className="font-bold">2.3kg</span></p>
+                            </div>
+                        </div>
+                    ) : (
+                         <div className="flex items-center justify-between mb-6 relative">
+                            {/* Progress Bar Background */}
+                            <div className="absolute top-3 left-0 w-full h-1 bg-gray-100 -z-0"></div>
+                            {/* Current Progress */}
+                            {currentStepIndex >= 0 && (
+                                <div 
+                                    className="absolute top-3 left-0 h-1 bg-primary -z-0 transition-all duration-500"
+                                    style={{ width: `${(currentStepIndex / (steps.length - 1)) * 100}%` }}
+                                ></div>
+                            )}
+                            
+                            {steps.map((step, idx) => {
+                                const isCompletedStep = currentStepIndex >= idx;
+                                const isCurrent = currentStepIndex === idx;
+                                return (
+                                    <div key={step.status} className="relative z-10 flex flex-col items-center">
+                                        <div className={`w-7 h-7 rounded-full flex items-center justify-center border-2 bg-white ${
+                                            isCompletedStep ? 'border-primary text-primary' : 'border-gray-200 text-gray-300'
+                                        }`}>
+                                            <div className={`w-3 h-3 rounded-full ${isCompletedStep ? 'bg-primary' : 'bg-transparent'}`}></div>
+                                        </div>
+                                        <span className={`text-xs mt-2 ${isCurrent ? 'font-bold text-gray-800' : 'text-gray-400'}`}>
+                                            {step.label}
+                                        </span>
                                     </div>
-                                    <span className={`text-xs mt-2 ${isCurrent ? 'font-bold text-gray-800' : 'text-gray-400'}`}>
-                                        {step.label}
-                                    </span>
-                                </div>
-                            );
-                        })}
-                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                    
                     <div className="text-center">
                         <h2 className="text-xl font-bold text-gray-800">
                             {order.status === OrderStatus.PENDING ? '等待回收员接单' : 
                              order.status === OrderStatus.ACCEPTED ? '回收员已接单' :
                              order.status === OrderStatus.IN_PROGRESS ? '回收员上门中' : '订单已完成'}
                         </h2>
-                        <p className="text-sm text-gray-500 mt-1">预计上门：{new Date(order.appointmentTime).toLocaleString()}</p>
+                        {!isCompleted && (
+                            <p className="text-sm text-gray-500 mt-1">预计上门：{new Date(order.appointmentTime).toLocaleString()}</p>
+                        )}
                     </div>
                 </>
             )}
@@ -140,7 +156,6 @@ const OrderDetail: React.FC = () => {
             </div>
             <div className="bg-gray-50 p-3 rounded text-xs text-gray-500">
                 <span className="font-bold">备注：</span> {order.address.detail ? '无特殊备注' : '无'} 
-                {/* Note: using address.detail as placeholder if remark not in type, assume user meant detail in PRD */}
             </div>
         </div>
 
